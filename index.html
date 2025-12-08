@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ghost_Trades - Advanced Trading Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.umd.js"></script>
+</head>
+<body>
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Connection Status Indicator -->
+    <div id="connection-status" class="connection-status">
+        <div class="status-dot"></div>
+        <span class="status-text">Connecting...</span>
+    </div>
+
+    <header>
+        <div class="header-container">
+            <div class="header-left">
+                <div class="site-branding">
+                    <div class="logo-wrapper">
+                        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <h1>Ghost_Trades</h1>
+                    </div>
+                    <span class="powered-by">powered by <span class="deriv-red">deriv</span></span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="balance-display" id="headerBalance" style="display: none;">
+                    <svg class="balance-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span class="balance-amount" id="headerBalanceAmount">0.00 USD</span>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="nav-bar">
+            <a href="#" id="dashboard-nav" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            <a href="#" id="speedbot-nav" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="nav-text">Speedbot</span>
+            </a>
+            <a href="#" id="ghostai-nav" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="11" width="18" height="10" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="8" cy="16" r="1" fill="currentColor"/>
+                    <circle cx="16" cy="16" r="1" fill="currentColor"/>
+                    <path d="M9 11V7C9 5.34315 10.3431 4 12 4C13.6569 4 15 5.34315 15 7V11" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <span class="nav-text">Ghost AI</span>
+            </a>
+            <a href="#" id="ghost-eodd-nav" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M8 12L12 16L16 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 8V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span class="nav-text">GHOST E/ODD</span>
+            </a>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <!-- Authentication Section -->
+        <section class="auth-container" id="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2>Welcome to Ghost_Trades</h2>
+                    <p class="auth-subtitle">Connect your Deriv account to start trading</p>
+                </div>
+                <div class="auth-body">
+                    <p id="statusMessage" class="status-message">Initializing connection...</p>
+
+                    <!-- OAuth Authentication Options -->
+                    <div class="auth-options">
+                        <div class="auth-description">
+                            <h3>Connect with Deriv</h3>
+                            <p>Authenticate securely with your Deriv account</p>
+                        </div>
+                        <div class="account-buttons">
+                            <button class="btn btn-demo btn-oauth" onclick="loginToDerivAccount('demo')">
+                                <span class="btn-text">Demo Account</span>
+                                <svg class="btn-loader" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" opacity="0.3"/>
+                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </button>
+                            <button class="btn btn-real btn-oauth" onclick="loginToDerivAccount('real')">
+                                <span class="btn-text">Real Account</span>
+                                <svg class="btn-loader" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" opacity="0.3"/>
+                                    <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="oauth-info">
+                            <small>🔒 Secure OAuth authentication with Deriv</small>
+                        </div>
+                    </div>
+
+                    <!-- Alternative API Token Method -->
+                    <div class="auth-divider">
+                        <span>or</span>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="apiTokenInput">API Token (Alternative)</label>
+                        <input
+                            type="password"
+                            id="apiTokenInput"
+                            name="apiToken"
+                            placeholder="Enter your Deriv API Token"
+                            autocomplete="off"
+                        >
+                        <small class="input-hint">Get your token from <a href="https://app.deriv.com/account/api-token" target="_blank">deriv.com/account/api-token</a></small>
+                    </div>
+                    <button id="loginButton" onclick="handleLogin()" class="btn-primary">
+                        <span class="btn-text">Connect with API Token</span>
+                        <div class="btn-loader" style="display: none;"></div>
+                    </button>
+
+                    <!-- WebSocket Test Button -->
+                    <button onclick="testWebSocketConnection()" class="btn-secondary" style="margin-top: var(--spacing-md);">
+                        <span>Test WebSocket Connection</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section class="dashboard" id="dashboard" style="display: none;">
+            <div class="section-header">
+                <h2>Account Overview</h2>
+                <button class="btn-refresh" onclick="requestBalance()" title="Refresh Balance">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21.5 2V8M21.5 8H16M21.5 8L18 4.5C16.7429 3.24286 15.1767 2.34896 13.4606 1.91867C11.7446 1.48838 9.94218 1.53936 8.25178 2.06617C6.56138 2.59298 5.04687 3.57791 3.86331 4.91677C2.67975 6.25563 1.86869 7.89648 1.51406 9.66438" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2.5 22V16M2.5 16H8M2.5 16L6 19.5C7.25714 20.7571 8.82332 21.651 10.5394 22.0813C12.2554 22.5116 14.0578 22.4606 15.7482 21.9338C17.4386 21.407 18.9531 20.4221 20.1367 19.0832C21.3203 17.7444 22.1313 16.1035 22.4859 14.3356" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="dashboard-grid">
+                <div class="card stat-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>Login ID</h3>
+                        <p id="loginIdDisplay" class="stat-value">...</p>
+                    </div>
+                </div>
+                <div class="card stat-card highlight">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2V22M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>Current Balance</h3>
+                        <p id="balanceDisplay" class="balance-large">...</p>
+                    </div>
+                </div>
+                <div class="card stat-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3>Active Markets</h3>
+                        <p id="symbolCountDisplay" class="stat-value">...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trading Interface (Speedbot) -->
+        <section class="trading-interface" id="trading-interface" style="display: none;">
+            <div class="trading-controls">
+                <h3 class="controls-title">Trade Controls</h3>
+                <div class="control-group">
+                    <label for="marketSelector">Market</label>
+                    <select id="marketSelector" onchange="handleMarketChange()"></select>
+                </div>
+                <div class="control-group">
+                    <label for="stakeInput">Stake Amount</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="stakeInput" name="stakeAmount" value="1.00" min="0.35" step="0.01">
+                        <span class="unit">USD</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="durationInput">Duration</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="durationInput" name="duration" value="1" min="1">
+                        <span class="unit">Ticks</span>
+                    </div>
+                </div>
+
+
+                <div class="contract-details">
+                    <div class="control-group">
+                        <label for="trade-type-select">Trade Type</label>
+                        <select id="trade-type-select" class="control-select">
+                            <option value="call">Rise</option>
+                            <option value="put">Fall</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="trade-actions">
+                    <button id="buyButtonUp" onclick="sendPurchaseRequest('CALL')" class="btn-trade btn-up">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 19V5M5 12L12 5L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>BUY UP</span>
+                    </button>
+                    <button id="buyButtonDown" onclick="sendPurchaseRequest('PUT')" class="btn-trade btn-down">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 5V19M5 12L12 19L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>BUY DOWN</span>
+                    </button>
+                </div>
+                <div id="tradeMessageContainer" class="trade-message">
+                    <svg class="message-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span>Select market and trade parameters</span>
+                </div>
+            </div>
+            
+            <div class="trading-main-area">
+                <div class="chart-container" id="chart-container">
+                    <div class="chart-loader">
+                        <div class="loader-spinner"></div>
+                        <p>Loading Chart...</p>
+                    </div>
+                </div>
+                
+                <div class="market-watch">
+                    <h4>Market Watch</h4>
+                    <div class="market-watch-container">
+                        <div id="marketWatchSkeleton" class="market-watch-skeleton">
+                            <div class="skeleton skeleton-card"></div>
+                            <div class="skeleton skeleton-card"></div>
+                            <div class="skeleton skeleton-card"></div>
+                        </div>
+                        <table id="tickerTable" class="ticker-table" style="display: none;">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Price</th>
+                                    <th>Change</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Ghost AI Bot Interface -->
+        <section class="ghostai-interface" id="ghostai-interface" style="display: none;">
+            <div class="bot-header-controls">
+                <h3 class="ghost-ai-heading">GHOST AI</h3>
+                <button id="ghost-ai-toggle-button" class="action-button primary-button">
+                    Start Bot
+                </button>
+            </div>
+            <div class="bot-grid">
+                <div class="bot-controls">
+                    <h4>Bot Configuration</h4>
+                    <div class="control-group">
+                        <label for="botInitialStake">Initial Stake</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="botInitialStake" name="botInitialStake" value="0.35" min="0.35" step="0.01">
+                            <span class="unit">USD</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="botTargetProfit">Target Profit</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="botTargetProfit" name="botTargetProfit" value="0.5" min="1">
+                            <span class="unit">USD</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="botPayoutPercentage">Payout %</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="botPayoutPercentage" name="botPayoutPercentage" value="75" min="1" max="100">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="botStopLoss">Stop Loss</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="botStopLoss" name="botStopLoss" value="50" min="1">
+                            <span class="unit">USD</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="botMaxMartingale">Max Martingale Steps</label>
+                        <input type="number" id="botMaxMartingale" name="botMaxMartingale" value="15" min="0">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="botAnalysisDigits">Analysis Digits (Last N)</label>
+                        <input type="number" id="botAnalysisDigits" name="botAnalysisDigits" value="20" min="10" max="100" title="Number of last digits to use for percentage analysis">
+                    </div>
+
+                    <h5 style="margin-top: 20px; color: var(--primary-color);">S1 Strategy Configuration</h5>
+                    
+                    <div class="control-group">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="botS1UseDigitCheck" name="botS1UseDigitCheck" checked style="width: auto;">
+                            <span>Enable "Check Last N Digits"</span>
+                        </label>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="botS1CheckDigits">S1: Check Last N Digits</label>
+                        <input type="number" id="botS1CheckDigits" name="botS1CheckDigits" value="2" min="1" max="10" title="Number of last digits to check for S1 condition">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="botS1MaxDigit">S1: Max Digit Value</label>
+                        <input type="number" id="botS1MaxDigit" name="botS1MaxDigit" value="2" min="0" max="9" title="All last N digits must be ≤ this value">
+                    </div>
+
+                    <div class="control-group">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="botS1UsePercentage" name="botS1UsePercentage" checked style="width: auto;">
+                            <span>Enable "Min Percentage"</span>
+                        </label>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="botS1Prediction">S1: Prediction Barrier</label>
+                        <input type="number" id="botS1Prediction" name="botS1Prediction" value="2" min="0" max="9" title="Barrier for OVER prediction">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="botS1Percentage">S1: Min Percentage</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="botS1Percentage" name="botS1Percentage" value="65" min="0" max="100">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="botS1MaxLosses">S1: Max Consecutive Losses</label>
+                        <input type="number" id="botS1MaxLosses" name="botS1MaxLosses" value="2" min="1" max="10" title="Stop S1 after this many consecutive losses until recovery">
+                    </div>
+
+                    <h5 style="margin-top: 20px; color: var(--accent-color);">S2 Recovery Configuration</h5>
+
+                    <div class="control-group">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="botS2UseDigitCheck" name="botS2UseDigitCheck" checked style="width: auto;">
+                            <span>Enable "Check Last N Digits"</span>
+                        </label>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="botS2CheckDigits">S2: Check Last N Digits</label>
+                        <input type="number" id="botS2CheckDigits" name="botS2CheckDigits" value="5" min="1" max="10" title="Number of last digits to check for S2 condition">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="botS2MaxDigit">S2: Max Digit Value</label>
+                        <input type="number" id="botS2MaxDigit" name="botS2MaxDigit" value="4" min="0" max="9" title="All last N digits must be ≤ this value">
+                    </div>
+
+                    <div class="control-group">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="botS2UsePercentage" name="botS2UsePercentage" checked style="width: auto;">
+                            <span>Enable "Min Percentage"</span>
+                        </label>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="botS2Prediction">S2: Prediction Barrier</label>
+                        <input type="number" id="botS2Prediction" name="botS2Prediction" value="4" min="0" max="9" title="Barrier for prediction">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="botS2ContractType">S2: Contract Type</label>
+                        <select id="botS2ContractType" name="botS2ContractType" class="control-select">
+                            <option value="UNDER">UNDER (Digits below barrier)</option>
+                            <option value="OVER" selected>OVER (Digits above barrier)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="botS2Percentage">S2: Min Percentage</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="botS2Percentage" name="botS2Percentage" value="45" min="0" max="100">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+
+                    <button id="ghost-ai-toggle-button-bottom" class="btn-bot btn-start">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <polygon points="5 3 19 12 5 21 5 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>Start Bot</span>
+                    </button>
+
+                </div>
+
+                <div class="bot-status">
+                    <h4>Activity Log</h4>
+                    <div id="bot-log-container" class="bot-log">
+                        <div class="log-info">[--:--:--] Waiting for initialization...</div>
+                    </div>
+                </div>
+
+                <div class="bot-history">
+                    <div class="bot-stats-header">
+                        <div class="history-header-top">
+                            <h4>Trade History</h4>
+                            <button id="ghost-ai-toggle-button-history" class="btn-bot btn-start">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <polygon points="5 3 19 12 5 21 5 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>Start Bot</span>
+                            </button>
+                        </div>
+                        <div class="bot-header-section">
+                            <div class="bot-title-info">
+                                <h2>Ghost AI Bot</h2>
+                                <span class="bot-strategy-badge">Rammy Auto Strategy</span>
+                            </div>
+                            <div class="bot-profit-display">
+                                <span class="profit-label">Total P/L</span>
+                                <span id="botProfitLossDisplay" class="profit-value">$0.00</span>
+                            </div>
+                        </div>
+                        <div class="bot-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Win Rate</div>
+                                <div class="stat-value" id="botWinRateDisplay">0.0%</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Trades</div>
+                                <div class="stat-value" id="botTradesCountDisplay">0W/0L</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="market-watch-container">
+                        <table id="bot-history-table" class="ticker-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Contract</th>
+                                   <th>P/L</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GHOST E/ODD Bot Interface -->
+        <section class="ghostai-interface" id="ghost-eodd-interface" style="display: none;">
+            <div class="bot-header-controls">
+                <h3 class="ghost-ai-heading">GHOST E/ODD</h3>
+                <button id="even-odd-toggle-button-top" class="action-button primary-button">
+                    Start Bot
+                </button>
+            </div>
+            <div class="bot-grid">
+                <div class="bot-controls">
+                    <h4>Bot Configuration</h4>
+                    <div class="control-group">
+                        <label for="eoddInitialStake">Initial Stake</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="eoddInitialStake" name="eoddInitialStake" value="0.35" min="0.35" step="0.01">
+                            <span class="unit">USD</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="eoddTargetProfit">Target Profit</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="eoddTargetProfit" name="eoddTargetProfit" value="1" min="1">
+                            <span class="unit">USD</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="eoddStopLoss">Stop Loss</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="eoddStopLoss" name="eoddStopLoss" value="999.0" min="1">
+                            <span class="unit">USD</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="eoddMartingaleFactor">Martingale Factor</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="eoddMartingaleFactor" name="eoddMartingaleFactor" value="2.12" min="1" step="0.01">
+                            <span class="unit">x</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label for="eoddMartingaleLevel">Martingale Level</label>
+                        <input type="number" id="eoddMartingaleLevel" name="eoddMartingaleLevel" value="7" min="0">
+                    </div>
+
+                    <button id="even-odd-toggle-button-bottom" class="btn-bot btn-start">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <polygon points="5 3 19 12 5 21 5 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>Start Bot</span>
+                    </button>
+
+                    <div class="bot-info-panel">
+                        <h5>Pattern Configuration</h5>
+                        <div class="strategy-details">
+                            <p><strong>Select Active Patterns (1=ODD, 2=EVEN)</strong></p>
+                            <div class="pattern-checkboxes" style="max-height: 200px; overflow-y: auto; margin: 10px 0;">
+                                <label style="display: flex; align-items: center; margin: 5px 0; gap: 10px;">
+                                    <input type="checkbox" class="pattern-checkbox" name="pattern-22222" value="22222" data-action="DIGITODD">
+                                    <span style="flex: 0 0 auto;">22222 →</span>
+                                    <select class="pattern-action-select" name="pattern-action-22222" data-pattern="22222" style="flex: 0 0 auto; padding: 2px 5px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
+                                        <option value="DIGITEVEN">EVEN</option>
+                                        <option value="DIGITODD" selected>ODD</option>
+                                    </select>
+                                </label>
+                                <label style="display: flex; align-items: center; margin: 5px 0; gap: 10px;">
+                                    <input type="checkbox" class="pattern-checkbox" name="pattern-11111" value="11111" data-action="DIGITEVEN">
+                                    <span style="flex: 0 0 auto;">11111 →</span>
+                                    <select class="pattern-action-select" name="pattern-action-11111" data-pattern="11111" style="flex: 0 0 auto; padding: 2px 5px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
+                                        <option value="DIGITEVEN" selected>EVEN</option>
+                                        <option value="DIGITODD">ODD</option>
+                                    </select>
+                                </label>
+                                <label style="display: flex; align-items: center; margin: 5px 0; gap: 10px;">
+                                    <input type="checkbox" class="pattern-checkbox" name="pattern-12121" value="12121" data-action="DIGITODD">
+                                    <span style="flex: 0 0 auto;">12121 →</span>
+                                    <select class="pattern-action-select" name="pattern-action-12121" data-pattern="12121" style="flex: 0 0 auto; padding: 2px 5px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
+                                        <option value="DIGITEVEN">EVEN</option>
+                                        <option value="DIGITODD" selected>ODD</option>
+                                    </select>
+                                </label>
+                                <label style="display: flex; align-items: center; margin: 5px 0; gap: 10px;">
+                                    <input type="checkbox" class="pattern-checkbox" name="pattern-21212" value="21212" data-action="DIGITEVEN">
+                                    <span style="flex: 0 0 auto;">21212 →</span>
+                                    <select class="pattern-action-select" name="pattern-action-21212" data-pattern="21212" style="flex: 0 0 auto; padding: 2px 5px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
+                                        <option value="DIGITEVEN" selected>EVEN</option>
+                                        <option value="DIGITODD">ODD</option>
+                                    </select>
+                                </label>
+                                <label style="display: flex; align-items: center; margin: 5px 0; gap: 10px;">
+                                    <input type="checkbox" class="pattern-checkbox" name="pattern-22122" value="22122" data-action="DIGITODD">
+                                    <span style="flex: 0 0 auto;">22122 →</span>
+                                    <select class="pattern-action-select" name="pattern-action-22122" data-pattern="22122" style="flex: 0 0 auto; padding: 2px 5px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
+                                        <option value="DIGITEVEN">EVEN</option>
+                                        <option value="DIGITODD" selected>ODD</option>
+                                    </select>
+                                </label>
+                                <label style="display: flex; align-items: center; margin: 5px 0; gap: 10px;">
+                                    <input type="checkbox" class="pattern-checkbox" name="pattern-11211" value="11211" data-action="DIGITODD">
+                                    <span style="flex: 0 0 auto;">11211 →</span>
+                                    <select class="pattern-action-select" name="pattern-action-11211" data-pattern="11211" style="flex: 0 0 auto; padding: 2px 5px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
+                                        <option value="DIGITEVEN">EVEN</option>
+                                        <option value="DIGITODD" selected>ODD</option>
+                                    </select>
+                                </label>
+                                <label style="display: flex; align-items: center; margin: 5px 0; gap: 10px;">
+                                    <input type="checkbox" class="pattern-checkbox" name="pattern-11122" value="11122" data-action="DIGITEVEN">
+                                    <span style="flex: 0 0 auto;">11122 →</span>
+                                    <select class="pattern-action-select" name="pattern-action-11122" data-pattern="11122" style="flex: 0 0 auto; padding: 2px 5px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
+                                        <option value="DIGITEVEN" selected>EVEN</option>
+                                        <option value="DIGITODD">ODD</option>
+                                    </select>
+                                </label>
+                                <label style="display: flex; align-items: center; margin: 5px 0; gap: 10px;">
+                                    <input type="checkbox" class="pattern-checkbox" name="pattern-22211" value="22211" data-action="DIGITODD">
+                                    <span style="flex: 0 0 auto;">22211 →</span>
+                                    <select class="pattern-action-select" name="pattern-action-22211" data-pattern="22211" style="flex: 0 0 auto; padding: 2px 5px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
+                                        <option value="DIGITEVEN">EVEN</option>
+                                        <option value="DIGITODD" selected>ODD</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <h5 style="margin-top: 15px;">Custom Pattern</h5>
+                            <div class="control-group">
+                                <label for="customPattern">Pattern (1s and 2s, up to 10 digits, e.g., 1111111111)</label>
+                                <input type="text" id="customPattern" name="customPattern" placeholder="e.g., 1111111111" pattern="[12]{1,10}" maxlength="10" style="width: 100%;">
+                            </div>
+                            <div class="control-group">
+                                <label for="customPatternAction">Contract Type</label>
+                                <select id="customPatternAction" name="customPatternAction" class="control-select" style="width: 100%;">
+                                    <option value="DIGITEVEN">EVEN</option>
+                                    <option value="DIGITODD">ODD</option>
+                                </select>
+                            </div>
+                            <button id="addCustomPattern" class="btn-bot btn-start" style="width: 100%; margin-top: 10px;">
+                                <span>Add Custom Pattern</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bot-status">
+                    <h4>Activity Log</h4>
+                    <div id="eodd-bot-log-container" class="bot-log">
+                        <div class="log-info">[--:--:--] Pattern analysis ready...</div>
+                    </div>
+                </div>
+
+                <div class="bot-history">
+                    <div class="bot-stats-header">
+                        <div class="history-header-top">
+                            <h4>Trade History</h4>
+                            <button id="even-odd-toggle-button-history" class="btn-bot btn-start">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <polygon points="5 3 19 12 5 21 5 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>Start Bot</span>
+                            </button>
+                        </div>
+                        <div class="bot-header-section">
+                            <div class="bot-title-info">
+                                <h2>GHOST E/ODD Bot</h2>
+                                <span class="bot-strategy-badge">Pattern Recognition Strategy</span>
+                            </div>
+                            <div class="bot-profit-display">
+                                <span class="profit-label">Total P/L</span>
+                                <span id="eoddProfitLossDisplay" class="profit-value">$0.00</span>
+                            </div>
+                        </div>
+                        <div class="bot-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Current Pattern</div>
+                                <div class="stat-value" id="currentPatternDisplay">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Trades</div>
+                                <div class="stat-value" id="eoddTradesCountDisplay">0W/0L</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="market-watch-container">
+                        <table id="eodd-bot-history-table" class="ticker-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Contract</th>
+                                    <th>P/L</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="utils.js"></script>
+    <script src="connection.js"></script>
+    <script src="trading.js"></script>
+    <script src="chart.js"></script>
+    <script src="navigation.js"></script>
+    <script src="ghost_ai_bot.js"></script>
+    <script src="ghost_even_odd.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
